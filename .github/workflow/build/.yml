@@ -1,0 +1,23 @@
+name: Build iOS App
+on: [push]
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Tools
+        run: pip install briefcase
+      - name: Package for iOS
+        run: |
+          briefcase create iOS
+          briefcase build iOS --no-sign
+      - name: Upload Finished App
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-app-file
+          path: build/
