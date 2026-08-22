@@ -1,23 +1,11 @@
 """
 Unit & Currency Converter
 A single-file BeeWare (Toga) app.
-
-HOW TO RUN (for testing on your computer, no App Store needed):
-1. Install Python 3.9+ from python.org (free)
-2. Open a terminal and run:
-       pip install toga requests
-3. Save this file as: converter_app.py
-4. Run it with:
-       python converter_app.py
-
-That's it — a window will open with the app running on your desktop.
-Packaging it for iPhone/Android later is a separate step (see notes at
-the bottom of this file).
 """
 
 import toga
 from toga.style import Pack
-from toga.style.pack import COLUMN, ROW
+from toga.style.pack import COLUMN
 import requests
 
 # ---- Unit conversion data (offline, no API needed, no cost) ----
@@ -56,6 +44,7 @@ class ConverterApp(toga.App):
             style=Pack(padding=5),
         )
 
+        # Initialize with Length units (will be updated when category changes)
         self.from_select = toga.Selection(items=list(LENGTH_UNITS.keys()), style=Pack(padding=5))
         self.to_select = toga.Selection(items=list(LENGTH_UNITS.keys()), style=Pack(padding=5))
 
@@ -85,6 +74,14 @@ class ConverterApp(toga.App):
         )
 
         self.main_window.content = box
+
+        # Set sensible defaults so the UI is initialized and avoid None values
+        # Set category to first key (Length), then populate units and set defaults
+        first_category = list(CATEGORIES.keys())[0]
+        self.category_select.value = first_category
+        # Trigger the on_category_change handler to populate from/to lists
+        self.on_category_change(None)
+
         self.main_window.show()
 
     def on_category_change(self, widget):
@@ -97,6 +94,12 @@ class ConverterApp(toga.App):
             self.from_select.items = units
             self.to_select.items = units
 
+        # set the from/to default values to the first item if unset
+        if not self.from_select.value and len(self.from_select.items) > 0:
+            self.from_select.value = self.from_select.items[0]
+        if not self.to_select.value and len(self.to_select.items) > 0:
+            self.to_select.value = self.to_select.items[0]
+
     def do_convert(self, widget):
         try:
             value = float(self.value_input.value)
@@ -108,12 +111,17 @@ class ConverterApp(toga.App):
         from_unit = self.from_select.value
         to_unit = self.to_select.value
 
+        if not from_unit or not to_unit:
+            self.result_label.text = "Please select units."
+            return
+
         if category == "Currency":
             self.result_label.text = "Fetching live rate..."
             try:
                 # frankfurter.app is a free, no-API-key exchange rate service
                 url = f"https://api.frankfurter.app/latest?amount={value}&from={from_unit}&to={to_unit}"
                 response = requests.get(url, timeout=8)
+                response.raise_for_status()
                 data = response.json()
                 converted = data["rates"][to_unit]
                 self.result_label.text = f"{value} {from_unit} = {converted:.2f} {to_unit}"
@@ -127,29 +135,9 @@ class ConverterApp(toga.App):
 
 
 def main():
-    return ConverterApp("Unit & Currency Converter", "com.example.converter")
+    # Keep the bundle id consistent with pyproject.toml
+    return ConverterApp("CashVert", "com.james.cashvert")
 
 
 if __name__ == "__main__":
     main().main_loop()
-
-
-# ---------------------------------------------------------------------
-# NOTES ON ADS & PUBLISHING (read this before promising yourself revenue):
-#
-# 1. Apple doesn't run an in-app ad network anymore — iAd shut down in
-#    2016. The two realistic options for ads are Google AdMob or Meta
-#    Audience Network, and both require adding their native SDK to the
-#    compiled iOS project. BeeWare/Toga has no official plugin for this,
-#    so it would mean editing the generated Xcode project by hand —
-#    a real coding task, not something this single Python file can do.
-#
-# 2. Publishing to the Apple App Store requires an Apple Developer
-#    account, which costs $99/year — there's no free tier. That's a
-#    hard cost you can't dodge if the goal is the iPhone App Store.
-#
-# 3. If "no money at all" is a firm constraint, Android is the cheaper
-#    path (one-time $25 Google Play registration fee, not annual), or
-#    you could skip app stores altogether and run this as a free website
-#    (Toga can also target the web) with Google AdSense.
-# ---------------------------------------------------------------------
