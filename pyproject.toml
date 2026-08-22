@@ -1,33 +1,28 @@
-name: Build iOS App
-on: [push]
+[tool.briefcase]
+project_name = "CashVert"
+bundle = "com.james.cashvert"
+version = "0.0.1"
+url = "https://github.com"
+license = "BSD-3-Clause"
+author = "James Taouk"
+author_email = "james@example.com"
 
-jobs:
-  build:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
+[tool.briefcase.app.cashvert]
+formal_name = "CashVert"
+description = "A simple currency and unit converter built with BeeWare."
+# The Python module that contains your `main()` function and app class:
+module = "CashVert"
+# The class that subclasses toga.App in that module:
+app_class = "ConverterApp"
+# Point to your source file (or a src/ directory). Here the file is CashVert.py:
+sources = ["CashVert.py"]
+# Runtime requirements:
+requires = [
+    "toga>=0.3.0",
+    "toga-ios>=0.3.0",
+    "requests"
+]
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install tooling
-        run: |
-          python -m pip install --upgrade pip setuptools wheel
-          pip install briefcase
-
-      - name: Create iOS App
-        run: |
-          # This command uses the pyproject.toml instructions
-          briefcase create iOS
-          briefcase build iOS --no-sign
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: ios-artifacts
-          path: |
-            iOS/**
-            build/**
-            dist/**
+[tool.briefcase.app.cashvert.iOS]
+# Uses the standard iOS template (default)
+template = "Xcode"
