@@ -11,11 +11,11 @@ author_email = "james@example.com"
 formal_name = "CashVert"
 description = "A simple currency and unit converter built with BeeWare."
 sources = ["CashVertpy"]
-# You must list 'requests' here so the app knows to install it on your phone
+# These are required to make the app work on iPhone
 requires = [
     "toga-ios>=0.3.0",
     "requests"
 ]
 
 [toolbriefcaseappcashvertios]
-# This section tells Briefcase to use the standard iOS template
+# Uses the standard iOS template
