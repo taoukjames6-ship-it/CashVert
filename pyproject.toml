@@ -1,0 +1,21 @@
+[toolbriefcase]
+project_name = "CashVert"
+bundle = "com.james.cashvert"
+version = "0.0.1"
+url = "https://github.com"
+license = "BSD-3-Clause"
+author = "James Taouk"
+author_email = "james@example.com"
+
+[toolbriefcaseappcashvert]
+formal_name = "CashVert"
+description = "A simple currency and unit converter built with BeeWare."
+sources = ["CashVertpy"]
+# You must list 'requests' here so the app knows to install it on your phone
+requires = [
+    "toga-ios>=0.3.0",
+    "requests"
+]
+
+[toolbriefcaseappcashvertios]
+# This section tells Briefcase to use the standard iOS template
