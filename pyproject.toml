@@ -1,21 +1,33 @@
-[toolbriefcase]
-project_name = "CashVert"
-bundle = "com.james.cashvert"
-version = "0.0.1"
-url = "https://github.com"
-license = "BSD-3-Clause"
-author = "James Taouk"
-author_email = "james@example.com"
+name: Build iOS App
+on: [push]
 
-[toolbriefcaseappcashvert]
-formal_name = "CashVert"
-description = "A simple currency and unit converter built with BeeWare."
-sources = ["CashVertpy"]
-# These are required to make the app work on iPhone
-requires = [
-    "toga-ios>=0.3.0",
-    "requests"
-]
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
 
-[toolbriefcaseappcashvertios]
-# Uses the standard iOS template
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install tooling
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          pip install briefcase
+
+      - name: Create iOS App
+        run: |
+          # This command uses the pyproject.toml instructions
+          briefcase create iOS
+          briefcase build iOS --no-sign
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-artifacts
+          path: |
+            iOS/**
+            build/**
+            dist/**
